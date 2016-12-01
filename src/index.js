@@ -1,6 +1,5 @@
 import Communicator from "./communicator.js";
 import { EventEmitter } from "events";
-import isArray from "lodash.isArray";
 import { CONNECTION_STATES, XEBRA_VERSION, XEBRA_MESSAGES } from "./constants.js";
 
 const MIRA_FCT_LOOKUP = {
@@ -183,7 +182,7 @@ class XebraCommunicator extends EventEmitter {
 	 * @param {object|Array.object} data - the received message(s)
 	 */
 	_dispatchMessage(data) {
-		if (isArray(data)) {
+		if (Array.isArray(data)) {
 			data.forEach(function(msg) {
 				this._handleMessage(msg);
 			}.bind(this));

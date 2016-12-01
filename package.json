@@ -1,6 +1,6 @@
 {
-    "name" : "xebra-communicator",
-    "version" : "1.0.0",
+	"name" : "xebra-communicator",
+	"version" : "1.0.0",
 	"description" : "Communication helper for Xebra",
 	"author" : "Cycling '74",
 	"contributors" : [
@@ -12,25 +12,25 @@
 	"main" : "lib/index.js",
 	"homepage" : "http://cycling74.com",
 	"readme" : "README.md",
-	"bugs" : "TODO",
+	"bugs" : "https://github.com/Cycling74/xebra-communicator/issues",
 	"license" : "MIT",
 	"repository" : {
 		"type" : "git",
-		"url" : "todo"
+		"url" : "https://github.com/Cycling74/xebra-communicator.git"
 	},
-    "scripts" : {
+	"scripts" : {
 		"lib" : "babel ./src -d ./lib",
 		"lint": "eslint src -c ./.eslintrc.json"
-    },
-	"dependencies" : {},
-    "devDependencies" : {
+	},
+	"dependencies" : {
+		"lodash.defaults" : "^4.2.0"
+	},
+	"devDependencies" : {
 		"babel-cli" : "^6.18.0",
-        "babel-preset-es2015" : "^6.14.0",
+		"babel-preset-es2015" : "^6.14.0",
 		"babel-plugin-transform-class-properties" : "^6.18.0",
 		"babel-plugin-add-module-exports" : "0.2.1",
 		"eslint": "^3.9.1",
-		"eslint-config-recommended": "^1.5.0",
-        "lodash.defaults" : "^4.2.0",
-        "lodash.isarray" : "^4.0.0"
-    }
+		"eslint-config-recommended": "^1.5.0"
+	}
 }

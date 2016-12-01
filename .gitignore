@@ -6,4 +6,4 @@ npm-debug.log
 
 # Project Files
 node_modules
-lib
+# lib
