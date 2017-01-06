@@ -135,11 +135,13 @@ class XebraCommunicator extends EventEmitter {
 					this._resync({}, true);
 				}
 				break;
+			case CONNECTION_STATES.RECONNECTING:
+			case CONNECTION_STATES.DISCONNECTED:
+				this._xebraUuid = null;
+				break;
 			case CONNECTION_STATES.INIT:
 			case CONNECTION_STATES.CONNECTING:
 			case CONNECTION_STATES.CONNECTION_FAIL:
-			case CONNECTION_STATES.RECONNECTING:
-			case CONNECTION_STATES.DISCONNECTED:
 			default:
 				// Nothing specific to do here
 				break;
