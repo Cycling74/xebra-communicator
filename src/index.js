@@ -16,6 +16,45 @@ const MIRA_FCT_LOOKUP = {
 	[XEBRA_MESSAGES.STATEDUMP] : "_statedump"
 };
 
+function maxEquivalentForJS(anything, mustBeFlatArray = false) {
+	let equivalent;
+	switch (typeof anything) {
+		case "undefined":
+			throw new Error("Cannot convert undefined to a Max type");
+
+		case "number":
+			if (isNaN(anything)) throw new Error("Cannot convert NaN to a Max type");
+			equivalent = anything;
+			break;
+
+		case "boolean":
+			equivalent = anything ? 1 : 0;
+			break;
+
+		case "string":
+			if (anything.length === 0) throw new Error("Cannot convert empty string to Max type");
+			equivalent = anything;
+			break;
+
+		case "symbol":
+			throw new Error("Cannot convert symbol to Max type");
+
+		case "object":
+			if (anything === null) throw new Error("Cannot convert null to Max type");
+			if (Array.isArray(anything)) {
+				equivalent = convertArrayToMaxList(anything, mustBeFlatArray);
+			} else {
+				equivalent = convertObjectToMaxDict(anything);
+			}
+			break;
+
+		default:
+			throw new Error("Could not convert message to Max message");
+	}
+
+	return equivalent;
+}
+
 function convertArrayToMaxList(array, mustBeFlat = false) {
 	if (mustBeFlat) {
 		if (array.find( (elt) => (typeof(elt)) === "object") !== undefined) {
@@ -44,47 +83,6 @@ function generateUuid() {
 		return v.toString(16);
 	});
 	return id;
-}
-
-function maxEquivalentForJS(anything, mustBeFlatArray = false) {
-	let equivalent;
-	switch (typeof anything) {
-		case "undefined":
-			throw new Error("Cannot convert undefined to a Max type");
-			break;
-
-		case "number":
-			if (isNaN(anything)) throw new Error("Cannot convert NaN to a Max type");
-			equivalent = anything;
-			break;
-
-		case "boolean":
-			equivalent = anything ? 1 : 0;
-			break;
-
-		case "string":
-			if (anything.length === 0) throw new Error("Cannot convert empty string to Max type");
-			equivalent = anything;
-			break;
-
-		case "symbol":
-			throw new Error("Cannot convert symbol to Max type");
-			break;
-
-		case "object":
-			if (anything === null) throw new Error("Cannot convert null to Max type");
-			if (Array.isArray(anything)) {
-				equivalent = convertArrayToMaxList(anything, mustBeFlatArray);
-			} else {
-				equivalent = convertObjectToMaxDict(anything);
-			}
-			break;
-
-		default:
-			throw new Error("Could not convert message to Max message");
-	}
-
-	return equivalent;
 }
 
 /**
@@ -477,7 +475,7 @@ class XebraCommunicator extends EventEmitter {
 		if (payload !== undefined) {
 			const data = {
 				channel,
-				payload,
+				payload
 			};
 			this._sendMessage("channel_message", data);
 		}
