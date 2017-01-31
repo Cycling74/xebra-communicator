@@ -18,7 +18,7 @@ const MIRA_FCT_LOOKUP = {
 
 function convertArrayToMaxList(array, mustBeFlat = false) {
 	if (mustBeFlat) {
-		if (array.find( (elt) => (typeof(elt)) === object) !== undefined) {
+		if (array.find( (elt) => (typeof(elt)) === "object") !== undefined) {
 			throw new Error("Xebra can only send a flat array of numbers, strings and booleans to a Max list");
 		}
 	}
@@ -28,7 +28,7 @@ function convertArrayToMaxList(array, mustBeFlat = false) {
 
 function convertObjectToMaxDict(obj) {
 	const retObj = {};
-	for (k in obj) {
+	for (let k in obj) {
 		if (obj.hasOwnProperty(k)) {
 			retObj[k] = maxEquivalentForJS(obj[k]);
 		}
@@ -72,11 +72,11 @@ function maxEquivalentForJS(anything, mustBeFlatArray = false) {
 			break;
 
 		case "object":
-			if (message === null) throw new Error("Cannot convert null to Max type");
-			if (Array.isArray(message)) {
-				payload = convertArrayToMaxList(message, mustBeFlatArray);
+			if (anything === null) throw new Error("Cannot convert null to Max type");
+			if (Array.isArray(anything)) {
+				equivalent = convertArrayToMaxList(anything, mustBeFlatArray);
 			} else {
-				payload = convertObjectToMaxDict(message);
+				equivalent = convertObjectToMaxDict(anything);
 			}
 			break;
 
