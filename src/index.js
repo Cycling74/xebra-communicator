@@ -475,6 +475,7 @@ class XebraCommunicator extends EventEmitter {
 		if (payload !== undefined) {
 			const data = {
 				channel,
+				name : this._name,
 				payload
 			};
 			this._sendMessage("channel_message", data);
