@@ -49,6 +49,7 @@ export const XEBRA_VERSION = "00.01.07";
 export const XEBRA_MESSAGES = {
 	ADD_NODE : "add_node",
 	ADD_PARAM : "add_param",
+	CHANNEL_MESSAGE : "channel_message",
 	CLIENT_PARAM_CHANGE : "client_param_change",
 	CONNECTION_CHANGE : "connection_change",
 	DELETE_NODE : "delete_node",
