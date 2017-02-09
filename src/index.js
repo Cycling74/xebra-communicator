@@ -5,6 +5,7 @@ import { CONNECTION_STATES, XEBRA_VERSION, XEBRA_MESSAGES } from "./constants.js
 const MIRA_FCT_LOOKUP = {
 	[XEBRA_MESSAGES.ADD_NODE] : "_addNode",
 	[XEBRA_MESSAGES.ADD_PARAM] : "_addParam",
+	[XEBRA_MESSAGES.CHANNEL_MESSAGE] : "_channelMessage",
 	[XEBRA_MESSAGES.DELETE_NODE] : "_deleteNode",
 	[XEBRA_MESSAGES.HANDLE_RESOURCE_DATA] : "_handleResourceData",
 	[XEBRA_MESSAGES.HANDLE_RESOURCE_INFO] : "_handleResourceInfo",
@@ -14,6 +15,66 @@ const MIRA_FCT_LOOKUP = {
 	[XEBRA_MESSAGES.SET_UUID] : "_setXebraUuid",
 	[XEBRA_MESSAGES.STATEDUMP] : "_statedump"
 };
+
+function maxEquivalentForJS(anything, mustBeFlatArray = false) {
+	let equivalent;
+	switch (typeof anything) {
+		case "undefined":
+			throw new Error("Cannot convert undefined to a Max type");
+
+		case "number":
+			if (isNaN(anything)) throw new Error("Cannot convert NaN to a Max type");
+			equivalent = anything;
+			break;
+
+		case "boolean":
+			equivalent = anything ? 1 : 0;
+			break;
+
+		case "string":
+			if (anything.length === 0) throw new Error("Cannot convert empty string to Max type");
+			equivalent = anything;
+			break;
+
+		case "symbol":
+			throw new Error("Cannot convert symbol to Max type");
+
+		case "object":
+			if (anything === null) throw new Error("Cannot convert null to Max type");
+			if (Array.isArray(anything)) {
+				equivalent = convertArrayToMaxList(anything, mustBeFlatArray);
+			} else {
+				equivalent = convertObjectToMaxDict(anything);
+			}
+			break;
+
+		default:
+			throw new Error("Could not convert message to Max message");
+	}
+
+	return equivalent;
+}
+
+function convertArrayToMaxList(array, mustBeFlat = false) {
+	if (mustBeFlat) {
+		if (array.find( (elt) => (typeof(elt)) === "object") !== undefined) {
+			throw new Error("Xebra can only send a flat array of numbers, strings and booleans to a Max list");
+		}
+	}
+
+	return array.map( (elt) => maxEquivalentForJS(elt) );
+}
+
+function convertObjectToMaxDict(obj) {
+	const retObj = {};
+	for (let k in obj) {
+		if (obj.hasOwnProperty(k)) {
+			retObj[k] = maxEquivalentForJS(obj[k]);
+		}
+	}
+
+	return retObj;
+}
 
 function generateUuid() {
 	let id = "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, function(c) {
@@ -135,11 +196,13 @@ class XebraCommunicator extends EventEmitter {
 					this._resync({}, true);
 				}
 				break;
+			case CONNECTION_STATES.RECONNECTING:
+			case CONNECTION_STATES.DISCONNECTED:
+				this._xebraUuid = null;
+				break;
 			case CONNECTION_STATES.INIT:
 			case CONNECTION_STATES.CONNECTING:
 			case CONNECTION_STATES.CONNECTION_FAIL:
-			case CONNECTION_STATES.RECONNECTING:
-			case CONNECTION_STATES.DISCONNECTED:
 			default:
 				// Nothing specific to do here
 				break;
@@ -231,6 +294,10 @@ class XebraCommunicator extends EventEmitter {
 		 * @param {object} payload - The ParamNode add payload
 		 */
 		this.emit(XEBRA_MESSAGES.ADD_PARAM, data.payload);
+	}
+
+	_channelMessage(data) {
+		this.emit(XEBRA_MESSAGES.CHANNEL_MESSAGE, data.payload.channel, data.payload.message);
 	}
 
 	/**
@@ -393,6 +460,26 @@ class XebraCommunicator extends EventEmitter {
 	 */
 	getResourceInfo(data) {
 		this._sendMessage("get_resource_info", data);
+	}
+
+	/**
+	 * Send a channel message to the Xebra.Server. This will be forwarded to all mira.channel
+	 * objects with the named channel
+	 * @param {string} channel - The channel on which to send the message
+	 * @param {number|string|array|object} message - The data to send
+	 * @throws Will throw an error if the message cannot be coerced to a Max message
+	 */
+	sendChannelMessage(channel, message) {
+		let payload = maxEquivalentForJS(message, true);
+
+		if (payload !== undefined) {
+			const data = {
+				channel,
+				name : this._name,
+				payload
+			};
+			this._sendMessage("channel_message", data);
+		}
 	}
 
 	/**
